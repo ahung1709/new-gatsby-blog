@@ -1,5 +1,6 @@
 import * as React from "react"
-import { Link } from "gatsby"
+import { graphql, Link } from "gatsby"
+import styled from "styled-components"
 import { StaticImage } from "gatsby-plugin-image"
 
 import Layout from "../components/layout"
@@ -69,9 +70,34 @@ const moreLinks = [
 
 const utmParameters = `?utm_source=starter&utm_medium=start-page&utm_campaign=default-starter`
 
-const IndexPage = () => (
-  <Layout>
-    <div className={styles.textCenter}>
+const BlogLink = styled(Link)`
+  text-decoration: none;
+`
+
+const BlogTitle = styled.h3`
+  margin-bottom: 20px;
+  color: blue;
+`
+
+export default ({ data }) => {
+  console.log(data)
+  return (
+    <Layout>
+      <div>
+        <h1>Yihua's Thoughts</h1>
+        <h4>{data.allMarkdownRemark.totalCount}</h4>
+        {data.allMarkdownRemark.edges.map(({ node }) => (
+          <div key={node.id}>
+            <BlogLink to={node.fields.slug}>
+              <BlogTitle>
+                {node.frontmatter.title} - {node.frontmatter.date}
+              </BlogTitle>
+            </BlogLink>
+            <p>{node.excerpt}</p>
+          </div>
+        ))}
+      </div>
+      {/* <div className={styles.textCenter}>
       <StaticImage
         src="../images/example.png"
         loading="eager"
@@ -114,9 +140,10 @@ const IndexPage = () => (
         <a href={`${link.url}${utmParameters}`}>{link.text}</a>
         {i !== moreLinks.length - 1 && <> · </>}
       </React.Fragment>
-    ))}
-  </Layout>
-)
+    ))} */}
+    </Layout>
+  )
+}
 
 /**
  * Head export to define metadata for the page
@@ -125,4 +152,26 @@ const IndexPage = () => (
  */
 export const Head = () => <Seo title="Home" />
 
-export default IndexPage
+// export default IndexPage
+
+export const query = graphql`
+  query {
+    allMarkdownRemark(sort: { frontmatter: { date: DESC } }) {
+      totalCount
+      edges {
+        node {
+          id
+          frontmatter {
+            description
+            title
+            date
+          }
+          fields {
+            slug
+          }
+          excerpt
+        }
+      }
+    }
+  }
+`
